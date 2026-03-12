@@ -22,6 +22,9 @@ class ProvinciasViewModel @Inject constructor(
     private val _provinciasList = MutableStateFlow<List<Provincia>>(emptyList())
     val provinciasList = _provinciasList.asStateFlow()
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error = _error.asStateFlow()
+
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -37,8 +40,23 @@ class ProvinciasViewModel @Inject constructor(
         }
     }
 
-    fun insertProvincias (provincia : Provincia) = viewModelScope.launch {
-        repositorioProvincias.insertProvincias(provincia)
+    fun insertProvincias(provincia: Provincia) = viewModelScope.launch {
+        try {
+            _error.value = null
+            repositorioProvincias.insertProvincias(provincia)
+        } catch (e: Exception) {
+            val message = e.message ?: ""
+            if (message.contains("PRIMARY KEY", ignoreCase = true) || message.contains("UNIQUE", ignoreCase = true)) {
+                _error.value = "Error: El código de provincia '${provincia.cod_provincia}' ya está registrado."
+            } else {
+                _error.value = "Error al guardar la provincia: ${e.message}"
+            }
+            Log.e("ProvinciasViewModel", "Error al insertar: ${e.message}")
+        }
+    }
+
+    fun clearError() {
+        _error.value = null
     }
 
     fun updateProvincias (provincia : Provincia) = viewModelScope.launch {

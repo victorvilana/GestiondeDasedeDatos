@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ProvinciasDBDao {
 
-    @Query("SELECT * from t_provincias")
+    @Query("SELECT * from t_provincias ORDER BY cod_provincia ASC")
     fun getAllProvincias(): Flow<List<Provincia>>
 
     @Query("SELECT * from t_provincias where cod_provincia = :id")
@@ -22,7 +22,7 @@ interface ProvinciasDBDao {
     @Query("SELECT * from t_provincias where nombre_provincia = :id")
     suspend fun getProvinciasByNombre(id: String): Provincia
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertProvincias(provincia: Provincia)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)

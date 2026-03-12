@@ -3,6 +3,7 @@ package com.example.gestiondedasededatos.screens
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,6 +46,7 @@ fun ProvinciasScreen(
     onDeleteProvincia: (Provincia) -> Unit,
     onGetAllProvincia: () -> Unit,
     provincias: List<Provincia>,
+    errorMessage: String? = null
 ) {
 
     var codProvincia by remember { mutableStateOf("") }
@@ -73,14 +75,24 @@ fun ProvinciasScreen(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
+            //.fillMaxHeight(),
 
             horizontalAlignment = Alignment.CenterHorizontally
 
         ) {
+
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage,
+                    color = Color.Red,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
             OutlinedTextField(
                 label = { Text(text = "Código de la provincia") },
                 value = codProvincia,
-                onValueChange = {codProvincia = it},
+                onValueChange = { codProvincia = it },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -88,7 +100,7 @@ fun ProvinciasScreen(
             OutlinedTextField(
                 label = { Text(text = "Nombre de la provincia") },
                 value = nombreProvincia,
-                onValueChange = {nombreProvincia = it},
+                onValueChange = { nombreProvincia = it },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -104,8 +116,11 @@ fun ProvinciasScreen(
                         )
                         codProvincia = ""
                         nombreProvincia = ""
-                    } else{
-                        Log.d("Provincias", "No se pudo guardar la provincia $codProvincia - $nombreProvincia")
+                    } else {
+                        Log.d(
+                            "Provincias",
+                            "No se pudo guardar la provincia $codProvincia - $nombreProvincia"
+                        )
                     }
 
                 },
@@ -137,13 +152,10 @@ fun ProvinciasScreen(
 }
 
 
-
-
-
 @Composable
 fun ItemProvincia(
-        provincia: Provincia,
-        onDelete: (Provincia) -> Unit
+    provincia: Provincia,
+    onDelete: (Provincia) -> Unit
 ) {
 
     Surface(
@@ -170,19 +182,16 @@ fun ItemProvincia(
                 Text(text = formatoFecha(provincia.fecha.time))
 
             }
-            IconButton(onClick = {onDelete(provincia)}) {
+            IconButton(onClick = { onDelete(provincia) }) {
                 Icon(Icons.Rounded.Delete, contentDescription = "Eliminar Nota")
             }
         }
     }
 }
 
-fun formatoFecha(time : Long) : String {
+fun formatoFecha(time: Long): String {
     val fecha = Date(time)
     val format = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
     return format.format(fecha)
 }
-
-
-
 

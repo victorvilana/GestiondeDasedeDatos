@@ -24,6 +24,9 @@ class CantonesViewModel @Inject constructor(
     private val _cantonesList = MutableStateFlow<List<Canton>>(emptyList())
     val cantonesList = _cantonesList.asStateFlow()
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error = _error.asStateFlow()
+
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -39,8 +42,25 @@ class CantonesViewModel @Inject constructor(
         }
     }
 
-    fun insertCantones (canton : Canton) = viewModelScope.launch {
-        repositorioCantones.insertCantones(canton)
+    fun insertCantones(canton: Canton) = viewModelScope.launch {
+        try {
+            _error.value = null // Limpiar error previo
+            repositorioCantones.insertCantones(canton)
+        } catch (e: Exception) {
+            val message = e.message ?: ""
+            if (message.contains("FOREIGN KEY", ignoreCase = true)) {
+                _error.value = "Error: La provincia '${canton.cod_provincia}' no existe. Por favor, ingrésala primero."
+            } else if (message.contains("PRIMARY KEY", ignoreCase = true) || message.contains("UNIQUE", ignoreCase = true)) {
+                _error.value = "Error: El código de cantón '${canton.cod_canton}' ya está registrado."
+            } else {
+                _error.value = "Error inesperado al guardar: ${e.message}"
+            }
+            Log.e("CantonesViewModel", "Error al insertar: ${e.message}")
+        }
+    }
+
+    fun clearError() {
+        _error.value = null
     }
 
     fun updateCantones (canton: Canton) = viewModelScope.launch {

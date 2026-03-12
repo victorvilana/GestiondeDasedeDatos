@@ -1,6 +1,8 @@
 package com.example.gestiondedasededatos.screens
 
 import android.util.Log
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,8 +12,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -46,10 +52,13 @@ fun CantonesScreen(
     onDeleteCanton: (Canton) -> Unit,
     onGetAllCanton: () -> Unit,
     cantones: List<Canton>,
+    provincias: List<Provincia>,
+    errorMessage: String? = null
 ) {
     var codProvincia by remember { mutableStateOf("") }
     var codCanton by remember { mutableStateOf("") }
     var nombreCanton by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
 
 
     Column(
@@ -77,12 +86,53 @@ fun CantonesScreen(
             horizontalAlignment = Alignment.CenterHorizontally
 
         ) {
-            OutlinedTextField(
-                label = { Text(text = "Código de la provincia") },
-                value = codProvincia,
-                onValueChange = {codProvincia = it},
-                modifier = Modifier.fillMaxWidth()
-            )
+
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage,
+                    color = Color.Red,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            Box(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    label = { Text(text = "Código de la provincia") },
+                    value = codProvincia,
+                    onValueChange = {},
+                    readOnly = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    trailingIcon = {
+                        IconButton(onClick = { expanded = !expanded }) {
+                            val icon = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown
+                            Icon(icon, contentDescription = null)
+                        }
+                    }
+                )
+                // Surface invisible encima para capturar el click en todo el campo
+                Surface(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clickable { expanded = !expanded },
+                    color = Color.Transparent
+                ) {}
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.fillMaxWidth(0.9f)
+                ) {
+                    provincias.forEach { provincia ->
+                        DropdownMenuItem(
+                            text = { Text("${provincia.cod_provincia} - ${provincia.nombre_provincia}") },
+                            onClick = {
+                                codProvincia = provincia.cod_provincia
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
 
             OutlinedTextField(
                 label = { Text(text = "Código del cantón") },
@@ -92,7 +142,7 @@ fun CantonesScreen(
             )
 
             OutlinedTextField(
-                label = { Text(text = "Nombre de la provincia") },
+                label = { Text(text = "Nombre del cantón") },
                 value = nombreCanton,
                 onValueChange = {nombreCanton = it},
                 modifier = Modifier.fillMaxWidth()
@@ -191,7 +241,3 @@ fun formatoFechaC(time : Long) : String {
     val format = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
     return format.format(fecha)
 }
-
-
-
-

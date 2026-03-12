@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface CantonesDBDao {
 
-    @Query("SELECT * from t_cantones")
+    @Query("SELECT * from t_cantones ORDER BY cod_canton ASC")
     fun getAllCantones(): Flow<List<Canton>>
 
     @Query("SELECT * from t_cantones where cod_canton = :id")
@@ -23,7 +23,7 @@ interface CantonesDBDao {
     @Query("SELECT * from t_cantones where nombre_canton = :id")
     suspend fun getCantonesByNombre(id: String): Canton
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.ABORT) // O simplemente @Insert
     suspend fun insertCantones(canton: Canton)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
